@@ -8,9 +8,10 @@ import java.nio.file.Paths;
 import java.util.UUID;
 
 public class JavaExecuter {
-    String baseDir = "temp";
-    String folderName;
-    String fileName = "Main.java";
+    String baseDir = "temp"; // 실행 파일이 생성될 폴더의 폴더
+    String folderName; // 실행 파일이 생성될 폴더
+    String fileName = "Main.java"; // 실팽 파일 이름
+
     // 폴더 경로 설정
     Path folderPath;
     Path filePath;
@@ -20,6 +21,7 @@ public class JavaExecuter {
         compile();
     }
 
+    // 코드 String을 파일로 저장
     public void save(String code){
         // UUID 기반 폴더 이름 생성
         folderName = UUID.randomUUID().toString();
@@ -36,6 +38,7 @@ public class JavaExecuter {
         }
     };
 
+    // 파일을 읽어 컴파일후 클래스 파일 저장
     public void compile(){
         try {
             Process compileProcess = new ProcessBuilder("javac","-encoding","UTF-8", filePath.toString()).inheritIO().start();
@@ -50,6 +53,7 @@ public class JavaExecuter {
         }
     };
 
+    // 클래스 파일을 읽고 입력 데이터를 넣어 실행후 출력 결과 반환
     public String run(Path inputFilePath) throws IOException, InterruptedException {
         Process runProcess = new ProcessBuilder("java", "-cp", folderPath.toString(), "Main").start();
 
@@ -78,6 +82,7 @@ public class JavaExecuter {
         return sb.toString().trim();
     }
 
+    // 실행 폴더 및 파일 삭제
     public void remove() {
         try {
             Files.walk(folderPath)

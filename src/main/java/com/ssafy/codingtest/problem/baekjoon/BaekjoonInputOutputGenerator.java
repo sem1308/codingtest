@@ -14,6 +14,7 @@ public class BaekjoonInputOutputGenerator {
     public final static String inputDir = "input";
     public final static String outputDir = "output";
     public final static String packagePath = BaekjoonInputOutputGenerator.class.getPackage().getName().replace('.', '/');
+
     Path problemPath;
     Path inputDirPath;
     Path outputDirPath;
@@ -21,12 +22,24 @@ public class BaekjoonInputOutputGenerator {
     Path inputFilePath;
     Path outputFilePath;
 
+    /*
+        아래와 같은 폴더 생성 후 데이터 생성
+        src/main/java/com/ssafy/codingtest/problem/baekjoon/{문제번호}/input
+        src/main/java/com/ssafy/codingtest/problem/baekjoon/{문제번호}/output
+    */
+
     public BaekjoonInputOutputGenerator(String problemNum) {
         this.problemPath = getProblemFolderPath(problemNum);
         this.inputDirPath = problemPath.resolve(inputDir);
         this.outputDirPath = problemPath.resolve(outputDir);
     }
 
+    /*
+     * inputFileName : 입력 데이터 파일 이름
+     * outputFileName : 출력 데이터 파일 이름
+     *
+     * 입력 데이터 생성 후 출력 데이터 생성
+     */
     public void makeData(String inputFileName, String outputFileName, Supplier<String> inputFunc, Function<List<String>, String> outputFunc) {
         this.inputFilePath = inputDirPath.resolve(inputFileName);
         this.outputFilePath = outputDirPath.resolve(outputFileName);
@@ -43,6 +56,11 @@ public class BaekjoonInputOutputGenerator {
         return "p"+problemNum;
     }
 
+    /*
+     * func : 입력 데이터 생성 함수
+     *
+     * 입력 데이터 생성 후 파일 저장
+     */
     public void makeInput(Supplier<String> func) {
         String result = func.get();
 
@@ -50,6 +68,12 @@ public class BaekjoonInputOutputGenerator {
         save(inputFilePath, result);
     }
 
+    /*
+     * func : 출력 데이터 생성 함수
+     *        - 입력 데이터 파일을 읽은 String 배열을 매개변수로 받음
+     *
+     * 출력 데이터 생성 후 파일 저장
+     */
     public void makeOutput(Function<List<String>,String> func) {
         // input.txt 파일에서 데이터를 읽고 출력 데이터를 계산하여 output.txt에 저장
         try {
@@ -62,6 +86,12 @@ public class BaekjoonInputOutputGenerator {
         }
     }
 
+    /*
+     * filePath : 파일 저장 경로
+     * result : 파일에 넣을 데이터
+     *
+     * 파일 생성 후 데이터 삽입
+     */
     private void save(Path filePath, String result) {
         try {
             // Ensure the directory exists

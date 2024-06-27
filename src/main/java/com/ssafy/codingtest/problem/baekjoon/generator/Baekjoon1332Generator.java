@@ -21,6 +21,7 @@ public class Baekjoon1332Generator extends BaekjoonGenerator {
         super("1332");
     }
 
+    // 입력 데이터 생성 함수
     @Override
     public Supplier<String> setInputFunc() {
         return () -> {
@@ -45,6 +46,7 @@ public class Baekjoon1332Generator extends BaekjoonGenerator {
         };
     }
 
+    // 출력 데이터 생성 함수
     @Override
     public Function<List<String>, String> setOutputFunc() {
         return (lines) -> {
@@ -60,18 +62,6 @@ public class Baekjoon1332Generator extends BaekjoonGenerator {
             }
 
             int answer = N;
-
-            // 0번 부터 i번 문제까지 풀었을 때
-
-            // 0 1 => 1번
-            // 0 1 2 => 1번
-            // 0 1 2 3 => 2번
-            // 0 1 2 3 4 => 2번
-            // 0 1/ 2 3/ => 2번
-            // 0 1 2/ 3 4/ => 2번
-            // (minIdx + 1)/2 + (maxIdx - minIdx + 1)/2
-
-            // i가 최소인 경우, j개 최대인 경우
 
             for (int i = 0; i < N; i++) {
                 for (int j = i+1; j < N; j++) {

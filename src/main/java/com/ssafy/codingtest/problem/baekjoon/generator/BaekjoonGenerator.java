@@ -8,16 +8,18 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public abstract class BaekjoonGenerator {
-    // 데이터 생성기
+    // 입.출력 데이터 생성기
     protected BaekjoonInputOutputGenerator generator;
 
     // 기본 데이터
-    protected String inputFileName;
-    protected String outputFileName;
+    protected String inputFileName; // 입력 데이터 파일 이름
+    protected String outputFileName; // 출력 데이터 파일 이름
 
-    protected Supplier<String> inputFunc;
-    protected Function<List<String>, String> outputFunc;
 
+    protected Supplier<String> inputFunc; // 입력 데이터 생성 함수
+    protected Function<List<String>, String> outputFunc; // 출력 데이터 생성 함수
+
+    // 테스트 케이스 개수
     protected int size = 10;
 
     public BaekjoonGenerator(String problemNum) {
