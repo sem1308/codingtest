@@ -1,6 +1,9 @@
 # 코딩테스트 채점 API 구현
+
+[github](https://github.com/sem1308/codingtest)
+
 ## 1. 제출한 데이터를 수신하고 결과 반환하는 API 서버 구현
-##### 채점을 위한 controller 구현
+#### 채점을 위한 controller 구현 : GradingController
 ```java
 @RestController
 @RequestMapping("/grade")
@@ -9,17 +12,47 @@ public class GradingController {
 
     private final GradingService gradingService;
 
+    /**
+     * userAnswer : 
+     * {
+     *    "problemNum" : "2609",
+     *    "user" : "hshhan0221",
+     *    "code" : "import ... "
+     * }
+     * 위 데이터를 받아 채점한 후 결과 반환
+     * 결과 형식은 다음과 같음
+     * {
+     *    "problemNum" : "2609",
+     *    "user" : "hshhan0221",
+     *    "caseResultList" : [
+     *       {
+    *           "problemNum" : "2609",
+    *           "caseNum" : 0,
+    *           "isAnswer" : true,
+     *       },
+     *       {
+    *           "problemNum" : "2609",
+    *           "caseNum" : 1,
+    *           "isAnswer" : false,
+     *       },
+     *    ],
+     *    "numAnswer" : 10,
+     *    "answerRatio" 1.0
+     * }
+     */
     @PostMapping
     public ResponseEntity<?> grading(@RequestBody UserAnswer userAnswer) throws IOException, InterruptedException {
-        System.out.println(userAnswer);
+        // 유저 데이터를 통해 채점
         List<CaseResult> caseResultList = gradingService.grading(userAnswer.getProblemNum(), userAnswer.getCode());
 
+        // 채점 결과 저장
         UserAnswerResponse response = UserAnswerResponse.builder()
             .user(userAnswer.getUser())
             .problemNum(userAnswer.getProblemNum())
             .caseResultList(caseResultList)
             .build();
 
+        // 정답수, 정답률 등록
         response.setInfo();
 
         return ResponseEntity.ok().body(response);
@@ -27,81 +60,63 @@ public class GradingController {
 }
 ```
 
-##### body에는 UserAnswer라는 객체로 받음
+유저 데이터를 받아 gradingService의 채점 메소드를 호출하여 결과를 반환한다.
+
+gradingService의 채점 로직은 다음 링크에서 설명하겠다. [채점 로직](#3-정답-여부-판별)
+
+#### request body에 사용되는 클래스 : UserAnswer
 ```java
 @Getter
 @Builder
 @AllArgsConstructor
 @ToString
 public class UserAnswer {
-    String problemNum;
-    String user;
-    String code;
+    String problemNum; // 문제 번호
+    String user; // 유저 아이디 or 이름
+    String code; // 유저 코드
 }
 ```
 
-###### UserAnswer에 있는 problemNum와 code를 통해 채점하는 service 구현
+#### 결과 반환 클래스 : UserAnswerResponse
 ```java
-@Service
-public class GradingService {
-    public List<CaseResult> grading(String problemNum, String code) throws IOException, InterruptedException {
-        // 컴파일, 실행을 위한 클래스
-        JavaExecuter executer = new JavaExecuter();
-        executer.saveAndCompile(code); // 코드 파일 저장 및 컴파일
+@Getter
+@Builder
+@AllArgsConstructor
+@ToString
+public class UserAnswerResponse {
+    String problemNum; // 문제 번호
+    String user; // 유저 아이디 or 이름
+    List<CaseResult> caseResultList; // 테스트케이스 정답 결과 목록
+    int numAnswer; // 정답수
+    float answerRatio; // 정답률
 
-        // 테스트케이스 폴더 경로
-        Path folderPath = BaekjoonInputOutputGenerator.getProblemFolderPath(problemNum);
-
-        // 입력 테스트케이스 폴더 경로
-        Path inputDirPath = folderPath.resolve(BaekjoonInputOutputGenerator.inputDir);
-
-        // 출력 테스트케이스 폴더 경로
-        Path outputDirPath = folderPath.resolve(BaekjoonInputOutputGenerator.outputDir);
-
-        // Files.walk()를 사용하여 폴더 내 모든 파일 경로를 가져옴 - 모든 테스트케이스 가져옴
-        List<Path> inputPaths = Files.walk(inputDirPath).filter(Files::isRegularFile).toList();
-        List<Path> outputPaths = Files.walk(outputDirPath).filter(Files::isRegularFile).toList();
-
-        // 해당 문제의 몇번 테스트 케이스가 맞았는지 저장하는 변수
-        List<CaseResult> isAnswerList = new ArrayList<>();
-
-        // 실행 후 결과 저장
-        for (int i = 0; i < inputPaths.size(); i++) {
-            Path inputPath = inputPaths.get(i);
-            Path outputPath = outputPaths.get(i);
-
-            String result = executer.run(inputPath);
-            String answer = Files.readString(outputPath);
-
-            boolean isAnswer = result.equals(answer);
-            isAnswerList.add(CaseResult.builder()
-                .problemNum(problemNum)
-                .caseNum(i)
-                .isAnswer(isAnswer)
-                .build());
-        }
-
-        // 코드 파일 및 폴더 삭제
-        executer.remove();
-
-        return isAnswerList;
+    // 정답수, 정답률 등록
+    public void setInfo(){
+        numAnswer = 0;
+        caseResultList.forEach(caseResult -> {
+            if(caseResult.getIsAnswer()) numAnswer++;
+        });
+        answerRatio = (float) numAnswer / caseResultList.size();
     }
 }
 ```
 
-##### 해당 문제의 몇번 테스트 케이스가 맞았는지 저장하는 클래스 (CaseResult)
+#### 해당 문제의 몇번 테스트 케이스가 맞았는지 저장하는 클래스 : CaseResult
 ```java
 @Getter
 @Builder
 public class CaseResult {
-    String problemNum;
-    int caseNum;
-    Boolean isAnswer;
+    String problemNum; // 문제 번호
+    int caseNum; // 테스트 케이스 번호
+    Boolean isAnswer; // 정답 여부
 }
 ```
 
 ## 2. 채점 데이터 프리셋 생성
-##### 백준 입.출력 데이터 생성 클래스
+#### 백준 입.출력 데이터 생성 클래스 : BaekjoonInputOutputGenerator
+
+입력, 출력을 생성하는 함수형 인터페이스를 인자로 받아 데이터를 생성하고 파일로 저장하는 클래스
+
 ```java
 public class BaekjoonInputOutputGenerator {
     public final static String baseDir = "src/main/java";
@@ -199,9 +214,15 @@ public class BaekjoonInputOutputGenerator {
 }
 ```
 
-입력, 출력을 생성하는 함수형 인터페이스를 인자로 받아 데이터를 생성하고 파일로 저장하는 클래스
+#### 백준 테스트 케이스 데이터 생성 추상 클래스 : BaekjoonGenerator
 
-##### 백준 테스트 케이스 데이터 생성 추상 클래스
+테스트 케이스 개수 만큼 테스트 케이스 생성 후 저장하는 클래스
+
+```BaekjoonGenerator```를 상속 <br>
+```setInputFunc```에는 입력 조건에 맞는 입력을 랜덤하게 생성하는 로직을 구현후 반환 <br>
+```setOutputFunc```에는 실제 알고리즘 내용을 등록 <br>
+이때, 입력은 stdin이 아니라 ```List<String>```으로 받기 때문에 이에 유의하여 작성한다.
+
 ```java
 public abstract class BaekjoonGenerator {
     // 입.출력 데이터 생성기
@@ -237,9 +258,8 @@ public abstract class BaekjoonGenerator {
 }
 
 ```
-테스트 케이스 개수 만큼 테스트 케이스 생성 후 저장하는 클래스
 
-##### 백준 테스트 케이스 데이터 생성 클래스 (백준 1332번 예시)
+#### 백준 테스트 케이스 데이터 생성 클래스 (백준 1332번 예시)
 ```java
 public class Baekjoon1332Generator extends BaekjoonGenerator {
     // 알고리즘에 필요한 데이터
@@ -313,14 +333,25 @@ public class Baekjoon1332Generator extends BaekjoonGenerator {
         };
     }
 }
-
 ```
 
-```BaekjoonGenerator```를 상속하여 ```setInputFunc```에는 입력 조건에 맞는 입력을 랜덤하게 생성하는 로직을 구현후 반환하고 ```setOutputFunc```에는 실제 알고리즘 내용을 등록한다. 이때, 입력은 stdin이 아니라 ```List<String>```으로 받기 때문에 이에 유의하여 작성한다.
+결과는 다음과 같이 저장된다.
 
+- input
+
+![input_folder](imgs/gen_input_1.png)
+![input_file](imgs/gen_input_2.png)
+
+- output
+
+![output_folder](imgs/gen_output_1.png)
+![output_file](imgs/gen_output_2.png)
 
 ## 3. 정답 여부 판별
-##### 사용자 코드를 컴파일 한 후 데이터를 받아 실행하는 클래스 구현 (JavaExecutor)
+#### 사용자 코드를 컴파일 한 후 데이터를 받아 실행하는 클래스 구현 : JavaExecutor
+
+아래 class의 ```saveAndCompile```을 통해 파일 저장 및 컴파일을 하고 ```run``` 함수를 통해 파일 데이터를 입력으로 하여 실행 결과를 받아올 수 있다.
+
 ```java
 public class JavaExecuter {
     String baseDir = "temp"; // 실행 파일이 생성될 폴더의 폴더
@@ -413,10 +444,10 @@ public class JavaExecuter {
 
 ```
 
-위 class의 ```saveAndCompile```을 통해 파일 저장 및 컴파일을 하고 ```run``` 함수를 통해 파일 데이터를 입력으로 하여 실행 결과를 받아올 수 있다. 
+#### UserAnswer에 있는 problemNum와 code를 통해 채점하는 service 구현 : GradingService
 
+각 테스트 케이스마다 실행 결과를 저장하고 실제 정답과 비교하여 몇변 문제의 몇번 테스트케이스가 맞았는지 여부를 저장한다.
 
-###### UserAnswer에 있는 problemNum와 code를 통해 채점하는 service 구현
 ```java
 @Service
 public class GradingService {
@@ -465,9 +496,7 @@ public class GradingService {
 }
 ```
 
-각 테스트 케이스마다 실행 결과를 저장하고 실제 정답과 비교하여 몇변 문제의 몇번 테스트케이스가 맞았는지 여부를 저장한다. 그 정보를 저장하는 class는 다음과 같다.
-
-##### 해당 문제의 몇번 테스트 케이스가 맞았는지 저장하는 클래스 (CaseResult)
+#### 해당 문제의 몇번 테스트 케이스가 맞았는지 저장하는 클래스 : CaseResult
 ```java
 @Getter
 @Builder
@@ -479,8 +508,8 @@ public class CaseResult {
 ```
 
 ## 4. POST MAN을 통한 API 테스트
-##### 정답 코드가 아닌 경우 (90% 정답)
-![alter](/imgs/postman_1.png)
-![alter](/imgs/postman_2.png)
-##### 정답 코드인 경우
-![alter](/imgs/postman_answer_1.png)
+#### 정답 코드가 아닌 경우 (90% 정답)
+![alter](imgs/postman_1.png)
+![alter](imgs/postman_2.png)
+#### 정답 코드인 경우
+![alter](/con03/rep03/imgs/postman_answer_1.png)
