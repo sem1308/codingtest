@@ -26,14 +26,14 @@ public class GradingController {
      *    "user" : "hshhan0221",
      *    "caseResultList" : [
      *       {
-    *           "problemNum" : "2609",
-    *           "caseNum" : 0,
-    *           "isAnswer" : true,
+     *           "problemNum" : "2609",
+     *           "caseNum" : 0,
+     *           "isAnswer" : true,
      *       },
      *       {
-    *           "problemNum" : "2609",
-    *           "caseNum" : 1,
-    *           "isAnswer" : false,
+     *           "problemNum" : "2609",
+     *           "caseNum" : 1,
+     *           "isAnswer" : false,
      *       },
      *    ],
      *    "numAnswer" : 10,
@@ -47,10 +47,10 @@ public class GradingController {
 
         // 채점 결과 저장
         UserAnswerResponse response = UserAnswerResponse.builder()
-            .user(userAnswer.getUser())
-            .problemNum(userAnswer.getProblemNum())
-            .caseResultList(caseResultList)
-            .build();
+                .user(userAnswer.getUser())
+                .problemNum(userAnswer.getProblemNum())
+                .caseResultList(caseResultList)
+                .build();
 
         // 정답수, 정답률 등록
         response.setInfo();
@@ -146,7 +146,7 @@ public class BaekjoonInputOutputGenerator {
     /*
      * inputFileName : 입력 데이터 파일 이름
      * outputFileName : 출력 데이터 파일 이름
-     * 
+     *
      * 입력 데이터 생성 후 출력 데이터 생성
      */
     public void makeData(String inputFileName, String outputFileName, Supplier<String> inputFunc, Function<List<String>, String> outputFunc) {
@@ -180,7 +180,7 @@ public class BaekjoonInputOutputGenerator {
     /*
      * func : 출력 데이터 생성 함수
      *        - 입력 데이터 파일을 읽은 String 배열을 매개변수로 받음
-     * 
+     *
      * 출력 데이터 생성 후 파일 저장
      */
     public void makeOutput(Function<List<String>,String> func) {
@@ -198,7 +198,7 @@ public class BaekjoonInputOutputGenerator {
     /*
      * filePath : 파일 저장 경로
      * result : 파일에 넣을 데이터
-     * 
+     *
      * 파일 생성 후 데이터 삽입
      */
     private void save(Path filePath, String result) {
@@ -232,7 +232,7 @@ public abstract class BaekjoonGenerator {
     protected String inputFileName; // 입력 데이터 파일 이름
     protected String outputFileName; // 출력 데이터 파일 이름
 
-    
+
     protected Supplier<String> inputFunc; // 입력 데이터 생성 함수
     protected Function<List<String>, String> outputFunc; // 출력 데이터 생성 함수
 
@@ -258,6 +258,8 @@ public abstract class BaekjoonGenerator {
 }
 
 ```
+
+체점 데이터(테스트 케이스)를 생성하려면 BaekjoonGenerator를 상속받아 ```setInputFunc```, ```setOutputFunc```를 override해서 실행하면 된다.
 
 #### 백준 테스트 케이스 데이터 생성 클래스 (백준 1332번 예시)
 ```java
@@ -513,3 +515,6 @@ public class CaseResult {
 ![alter](imgs/postman_2.png)
 #### 정답 코드인 경우
 ![alter](imgs/postman_answer_1.png)
+
+## 5. 전체 구조
+![struct](imgs/struct.png)
