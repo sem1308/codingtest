@@ -512,4 +512,4 @@ public class CaseResult {
 ![alter](imgs/postman_1.png)
 ![alter](imgs/postman_2.png)
 #### 정답 코드인 경우
-![alter](/con03/rep03/imgs/postman_answer_1.png)
+![alter](imgs/postman_answer_1.png)
