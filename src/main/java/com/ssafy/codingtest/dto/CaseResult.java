@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @Builder
 public class CaseResult {
-    String problemNum;
-    int caseNum;
-    Boolean isAnswer;
+    String problemNum; // 문제 번호
+    int caseNum; // 테스트 케이스 번호
+    Boolean isAnswer; // 정답 여부
 }

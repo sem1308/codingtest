@@ -21,17 +21,47 @@ public class GradingController {
 
     private final GradingService gradingService;
 
+    /**
+     * userAnswer :
+     * {
+     *    "problemNum" : "2609",
+     *    "user" : "hshhan0221",
+     *    "code" : "import ... "
+     * }
+     * 위 데이터를 받아 채점한 후 결과 반환
+     * 결과 형식은 다음과 같음
+     * {
+     *    "problemNum" : "2609",
+     *    "user" : "hshhan0221",
+     *    "caseResultList" : [
+     *       {
+     *           "problemNum" : "2609",
+     *           "caseNum" : 0,
+     *           "isAnswer" : true,
+     *       },
+     *       {
+     *           "problemNum" : "2609",
+     *           "caseNum" : 1,
+     *           "isAnswer" : false,
+     *       },
+     *    ],
+     *    "numAnswer" : 10,
+     *    "answerRatio" 1.0
+     * }
+     */
     @PostMapping
     public ResponseEntity<?> grading(@RequestBody UserAnswer userAnswer) throws IOException, InterruptedException {
-        System.out.println(userAnswer);
+        // 유저 데이터를 통해 채점
         List<CaseResult> caseResultList = gradingService.grading(userAnswer.getProblemNum(), userAnswer.getCode());
 
+        // 채점 결과 저장
         UserAnswerResponse response = UserAnswerResponse.builder()
-            .user(userAnswer.getUser())
-            .problemNum(userAnswer.getProblemNum())
-            .caseResultList(caseResultList)
-            .build();
+                .user(userAnswer.getUser())
+                .problemNum(userAnswer.getProblemNum())
+                .caseResultList(caseResultList)
+                .build();
 
+        // 정답수, 정답률 등록
         response.setInfo();
 
         return ResponseEntity.ok().body(response);

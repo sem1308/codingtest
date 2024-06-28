@@ -12,13 +12,15 @@ import java.util.List;
 @AllArgsConstructor
 @ToString
 public class UserAnswerResponse {
-    String problemNum;
-    String user;
-    List<CaseResult> caseResultList;
-    int numAnswer;
-    float answerRatio;
+    String problemNum; // 문제 번호
+    String user; // 유저 아이디 or 이름
+    List<CaseResult> caseResultList; // 테스트케이스 정답 결과 목록
+    int numAnswer; // 정답수
+    float answerRatio; // 정답률
 
+    // 정답수, 정답률 등록
     public void setInfo(){
+        numAnswer = 0;
         caseResultList.forEach(caseResult -> {
             if(caseResult.getIsAnswer()) numAnswer++;
         });
